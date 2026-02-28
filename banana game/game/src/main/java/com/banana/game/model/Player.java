@@ -23,11 +23,5 @@ public class Player {
         return difficulty;
     }
 
-    public void addScore(int points) {
-        this.score += points;
-    }
 
-    public void increaseDifficulty() {
-        this.difficulty++;
-    }
 }

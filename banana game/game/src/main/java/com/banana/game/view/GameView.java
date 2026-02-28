@@ -82,20 +82,4 @@ public class GameView extends JFrame {
         setVisible(true);
     }
 
-
-    public String getUserAnswer() {
-        return answerField.getText();
-    }
-
-    public void clearAnswerField() {
-        answerField.setText("");
-    }
-
-    public void addSubmitListener(ActionListener listener) {
-        submitButton.addActionListener(listener);
-    }
-
-    public void addLogoutListener(ActionListener listener) {
-        logoutButton.addActionListener(listener);
-    }
 }
