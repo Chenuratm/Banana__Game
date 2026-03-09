@@ -13,3 +13,10 @@ public class DatabaseConnection {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
+
+
+
+
+// virtual identity - Cookis ,session , otp
+//make more challenging
+//interoperabilty - use other apis
