@@ -7,6 +7,7 @@ import java.net.URL;
 
 public class FactService {
 
+
     public String getFact() {
 
         URL url = new URL("http://numbersapi.com/random/trivia");
