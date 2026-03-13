@@ -11,6 +11,7 @@ public class Player {
         this.score = score;
         this.difficulty = 1;
     }
+
     public String getUsername() {
         return username;
     }
@@ -23,5 +24,11 @@ public class Player {
         return difficulty;
     }
 
+    public void addScore(int points) {
+        this.score += points;
+    }
 
+    public void increaseDifficulty() {
+        this.difficulty++;
+    }
 }
