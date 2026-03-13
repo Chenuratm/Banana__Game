@@ -4,82 +4,104 @@ import com.banana.game.model.BananaQuestion;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.net.URL;
+import java.util.function.Consumer;
 
 public class GameView extends JFrame {
 
-    private JLabel usernameLabel;
-    private JLabel scoreLabel;
-    private JLabel timerLabel;
-    private JLabel challengeLabel;
+    private JLabel userLabel = new JLabel();
+    private JLabel scoreLabel = new JLabel("Score: 0");
+    private JLabel timerLabel = new JLabel("Time: 60");
+    private JLabel challengeLabel = new JLabel("Challenge: 0/6");
 
-    private JLabel questionImageLabel;
+    private JLabel imageLabel = new JLabel();
 
-    private JTextField answerField;
-    private JButton submitButton;
-    private JButton logoutButton;
+    private JButton[] answerButtons = new JButton[5];
+
+    private JLabel factLabel = new JLabel("", SwingConstants.CENTER);
+
+    private JButton logoutButton = new JButton("Logout");
 
     public GameView() {
 
-        setTitle("Banana Challenge Game");
-        setSize(800, 600);
+        setTitle("Banana Game");
+        setSize(800,600);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // ===== HEADER PANEL =====
-        JPanel headerPanel = new JPanel(new GridLayout(1, 4));
-        headerPanel.setBackground(new Color(255, 223, 0));
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel top = new JPanel();
+        top.add(userLabel);
+        top.add(scoreLabel);
+        top.add(timerLabel);
+        top.add(challengeLabel);
+        top.add(logoutButton);
 
-        usernameLabel = new JLabel("Player: ");
-        scoreLabel = new JLabel("Score: 0");
-        timerLabel = new JLabel("Time: 60");
-        challengeLabel = new JLabel("Challenge: 0/6");
+        add(top,BorderLayout.NORTH);
 
-        headerPanel.add(usernameLabel);
-        headerPanel.add(scoreLabel);
-        headerPanel.add(timerLabel);
-        headerPanel.add(challengeLabel);
+        imageLabel.setHorizontalAlignment(JLabel.CENTER);
+        add(imageLabel,BorderLayout.CENTER);
 
-        add(headerPanel, BorderLayout.NORTH);
+        JPanel answers = new JPanel(new GridLayout(1,5));
 
+        for(int i=0;i<5;i++){
 
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.setBackground(Color.WHITE);
+            answerButtons[i] = new JButton();
+            answers.add(answerButtons[i]);
+        }
 
-        questionImageLabel = new JLabel("", SwingConstants.CENTER);
-        centerPanel.add(questionImageLabel, BorderLayout.CENTER);
+        add(answers,BorderLayout.SOUTH);
 
-        add(centerPanel, BorderLayout.CENTER);
-
-
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-
-        answerField = new JTextField(10);
-        answerField.setFont(new Font("Arial", Font.PLAIN, 18));
-
-        submitButton = new JButton("Submit");
-        submitButton.setFont(new Font("Arial", Font.BOLD, 16));
-        submitButton.setBackground(new Color(34, 139, 34));
-        submitButton.setForeground(Color.WHITE);
-        submitButton.setFocusPainted(false);
-
-        logoutButton = new JButton("Logout");
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
-        logoutButton.setBackground(Color.RED);
-        logoutButton.setForeground(Color.WHITE);
-
-        bottomPanel.add(new JLabel("Your Answer: "));
-        bottomPanel.add(answerField);
-        bottomPanel.add(submitButton);
-        bottomPanel.add(logoutButton);
-
-        add(bottomPanel, BorderLayout.SOUTH);
+        add(factLabel,BorderLayout.WEST);
 
         setVisible(true);
     }
 
+    public void setUsername(String name){
+        userLabel.setText("Player: "+name);
+    }
+
+    public void setScore(int score){
+        scoreLabel.setText("Score: "+score);
+    }
+
+    public void setTimer(int time){
+        timerLabel.setText("Time: "+time);
+    }
+
+    public void setChallenge(int c){
+        challengeLabel.setText("Challenge: "+c+"/6");
+    }
+
+    public void displayQuestion(BananaQuestion q){
+
+        try{
+
+            ImageIcon icon = new ImageIcon(new URL(q.getImageUrl()));
+            imageLabel.setIcon(icon);
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void setAnswers(int[] answers, Consumer<Integer> listener){
+
+        for(int i=0;i<5;i++){
+
+            int value = answers[i];
+
+            answerButtons[i].setText(""+value);
+
+            answerButtons[i].addActionListener(e -> listener.accept(value));
+        }
+    }
+
+    public void showFact(String fact){
+
+        factLabel.setText("<html>"+fact+"</html>");
+    }
+
+    public JButton getLogoutButton(){
+        return logoutButton;
+    }
 }
