@@ -10,7 +10,7 @@ public class FactService {
 
     public String getFact() {
 
-        URL url = new URL("http://numbersapi.com/random/trivia");
+
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 
