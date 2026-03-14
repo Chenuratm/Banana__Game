@@ -8,7 +8,9 @@ import com.banana.game.session.SessionManager;
 import com.banana.game.view.GameView;
 
 import javax.swing.*;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class GameController {
 
@@ -23,9 +25,11 @@ public class GameController {
     private int score = 0;
     private int challenge = 0;
 
-    private int time = 60;
+    private int time = 40;     // timer for each challenge
 
     private Timer timer;
+
+    private int difficulty = 10;   // controls how hard answers are
 
     public GameController(GameView view,String username){
 
@@ -35,8 +39,6 @@ public class GameController {
 
         view.setUsername(username);
 
-        startTimer();
-
         nextChallenge();
 
         view.getLogoutButton().addActionListener(e->logout());
@@ -44,13 +46,21 @@ public class GameController {
 
     private void startTimer(){
 
+        time = 40;   // reset time every challenge
+        view.setTimer(time);
+
+        if(timer!=null){
+            timer.stop();
+        }
+
         timer = new Timer(1000,e->{
 
             time--;
             view.setTimer(time);
 
             if(time<=0){
-                endGame();
+                timer.stop();
+                showFact();
             }
 
         });
@@ -74,6 +84,8 @@ public class GameController {
         view.displayQuestion(currentQuestion);
 
         generateAnswers();
+
+        startTimer();   // start new 40 second timer
     }
 
     private void generateAnswers(){
@@ -86,12 +98,23 @@ public class GameController {
 
         int correctIndex = r.nextInt(5);
 
+        Set<Integer> used = new HashSet<>();
+
         for(int i=0;i<5;i++){
 
             if(i==correctIndex){
                 answers[i]=correct;
+                used.add(correct);
             }else{
-                answers[i]=r.nextInt(10);
+
+                int wrong;
+
+                do{
+                    wrong = correct + r.nextInt(difficulty*2) - difficulty;
+                }while(used.contains(wrong) || wrong<0);
+
+                answers[i]=wrong;
+                used.add(wrong);
             }
         }
 
@@ -100,9 +123,14 @@ public class GameController {
 
     private void checkAnswer(int selected){
 
+        timer.stop();
+
         if(selected == currentQuestion.getAnswer()){
 
             score += 10;
+
+            difficulty += 5;   // increase difficulty
+
             view.setScore(score);
         }
 
@@ -118,7 +146,9 @@ public class GameController {
         new Timer(10000,e->{
 
             ((Timer)e.getSource()).stop();
+
             view.showFact("");
+
             nextChallenge();
 
         }).start();
@@ -126,7 +156,9 @@ public class GameController {
 
     private void endGame(){
 
-        timer.stop();
+        if(timer!=null){
+            timer.stop();
+        }
 
         userService.updateScore(SessionManager.getCurrentUser(),score);
 
@@ -142,7 +174,9 @@ public class GameController {
 
     private void logout(){
 
-        timer.stop();
+        if(timer!=null){
+            timer.stop();
+        }
 
         SessionManager.logout();
 
