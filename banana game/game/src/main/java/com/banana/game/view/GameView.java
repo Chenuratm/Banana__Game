@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 import java.util.function.Consumer;
+import java.awt.event.ActionListener;
 
 public class GameView extends JFrame {
 
@@ -86,13 +87,24 @@ public class GameView extends JFrame {
 
     public void setAnswers(int[] answers, Consumer<Integer> listener){
 
-        for(int i=0;i<5;i++){
+        for(int i=0;i<answerButtons.length;i++){
 
-            int value = answers[i];
+            if(i < answers.length){
 
-            answerButtons[i].setText(""+value);
+                int value = answers[i];
 
-            answerButtons[i].addActionListener(e -> listener.accept(value));
+                answerButtons[i].setVisible(true);
+                answerButtons[i].setText(""+value);
+
+                for(ActionListener al : answerButtons[i].getActionListeners()){
+                    answerButtons[i].removeActionListener(al);
+                }
+
+                answerButtons[i].addActionListener(e -> listener.accept(value));
+
+            }else{
+                answerButtons[i].setVisible(false);
+            }
         }
     }
 
@@ -104,4 +116,16 @@ public class GameView extends JFrame {
     public JButton getLogoutButton(){
         return logoutButton;
     }
+    public void hideAnswers(){
+        for(JButton b : answerButtons){
+            b.setVisible(false);
+        }
+    }
+
+    public void showAnswers(){
+        for(JButton b : answerButtons){
+            b.setVisible(true);
+        }
+    }
+
 }

@@ -8,9 +8,12 @@ import com.banana.game.session.SessionManager;
 import com.banana.game.view.GameView;
 
 import javax.swing.*;
-import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class GameController {
 
@@ -25,18 +28,18 @@ public class GameController {
     private int score = 0;
     private int challenge = 0;
 
-    private int time = 40;     // timer for each challenge
-
+    private int time = 40;
     private Timer timer;
 
-    private int difficulty = 10;   // controls how hard answers are
+    private Timer shuffleTimer;
 
-    public GameController(GameView view,String username){
+    private int[] currentAnswers;
+
+    public GameController(GameView view, String username){
 
         this.view = view;
 
         SessionManager.login(username);
-
         view.setUsername(username);
 
         nextChallenge();
@@ -46,12 +49,10 @@ public class GameController {
 
     private void startTimer(){
 
-        time = 40;   // reset time every challenge
+        time = 40;
         view.setTimer(time);
 
-        if(timer!=null){
-            timer.stop();
-        }
+        if(timer!=null) timer.stop();
 
         timer = new Timer(1000,e->{
 
@@ -70,7 +71,7 @@ public class GameController {
 
     private void nextChallenge(){
 
-        if(challenge>=6){
+        if(challenge >= 6){
             endGame();
             return;
         }
@@ -85,7 +86,9 @@ public class GameController {
 
         generateAnswers();
 
-        startTimer();   // start new 40 second timer
+        applyDifficultyEffects();
+
+        startTimer();
     }
 
     private void generateAnswers(){
@@ -94,44 +97,102 @@ public class GameController {
 
         int correct = currentQuestion.getAnswer();
 
-        int[] answers = new int[5];
+        int optionCount = (challenge == 1) ? 4 : 5;
 
-        int correctIndex = r.nextInt(5);
+        currentAnswers = new int[optionCount];
 
         Set<Integer> used = new HashSet<>();
 
-        for(int i=0;i<5;i++){
+        int correctIndex = r.nextInt(optionCount);
 
-            if(i==correctIndex){
-                answers[i]=correct;
+        for(int i=0;i<optionCount;i++){
+
+            if(i == correctIndex){
+                currentAnswers[i] = correct;
                 used.add(correct);
             }else{
 
                 int wrong;
 
                 do{
-                    wrong = correct + r.nextInt(difficulty*2) - difficulty;
-                }while(used.contains(wrong) || wrong<0);
+                    wrong = r.nextInt(10); // ONLY 0–9
+                }while(used.contains(wrong));
 
-                answers[i]=wrong;
+                currentAnswers[i] = wrong;
                 used.add(wrong);
             }
         }
 
-        view.setAnswers(answers,this::checkAnswer);
+        view.setAnswers(currentAnswers, this::checkAnswer);
+    }
+
+    private void applyDifficultyEffects(){
+
+        if(challenge == 2){
+            hideTemporarily(3000);
+        }
+        else if(challenge == 3){
+            hideTemporarily(6000);
+        }
+        else if(challenge == 4){
+            hideTemporarily(9000);
+        }
+        else if(challenge == 5){
+            hideTemporarily(9000);
+            startShuffle();
+        }
+    }
+
+    private void hideTemporarily(int millis){
+
+        view.hideAnswers();
+
+        new Timer(millis, e -> {
+            ((Timer)e.getSource()).stop();
+            view.showAnswers();
+        }).start();
+    }
+
+    private void startShuffle(){
+
+        if(shuffleTimer!=null) shuffleTimer.stop();
+
+        shuffleTimer = new Timer(4000, e -> shuffleAnswers());
+
+        shuffleTimer.start();
+    }
+
+    private void shuffleAnswers(){
+
+        List<Integer> list = new ArrayList<>();
+
+        for(int a : currentAnswers){
+            list.add(a);
+        }
+
+        Collections.shuffle(list);
+
+        for(int i=0;i<list.size();i++){
+            currentAnswers[i] = list.get(i);
+        }
+
+        view.setAnswers(currentAnswers, this::checkAnswer);
     }
 
     private void checkAnswer(int selected){
 
         timer.stop();
 
+        if(shuffleTimer!=null) shuffleTimer.stop();
+
         if(selected == currentQuestion.getAnswer()){
 
             score += 10;
-
-            difficulty += 5;   // increase difficulty
-
             view.setScore(score);
+
+            if(challenge == 6){
+                JOptionPane.showMessageDialog(view, "🎉 Congratulations! 🎉");
+            }
         }
 
         showFact();
@@ -143,7 +204,7 @@ public class GameController {
 
         view.showFact(fact);
 
-        new Timer(10000,e->{
+        new Timer(5000,e->{
 
             ((Timer)e.getSource()).stop();
 
@@ -156,9 +217,8 @@ public class GameController {
 
     private void endGame(){
 
-        if(timer!=null){
-            timer.stop();
-        }
+        if(timer!=null) timer.stop();
+        if(shuffleTimer!=null) shuffleTimer.stop();
 
         userService.updateScore(SessionManager.getCurrentUser(),score);
 
@@ -174,9 +234,8 @@ public class GameController {
 
     private void logout(){
 
-        if(timer!=null){
-            timer.stop();
-        }
+        if(timer!=null) timer.stop();
+        if(shuffleTimer!=null) shuffleTimer.stop();
 
         SessionManager.logout();
 
