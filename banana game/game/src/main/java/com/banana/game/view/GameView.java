@@ -23,7 +23,7 @@ public class GameView extends JFrame {
     private JButton[] answerButtons = new JButton[5];
     private JButton logoutButton = new JButton("Logout");
 
-    // ✅ FULLSCREEN FACT PANEL
+    // FULLSCREEN FACT PANEL
     private JPanel factPanel = new JPanel();
     private JLabel factLabel = new JLabel("", SwingConstants.CENTER);
 
@@ -43,7 +43,6 @@ public class GameView extends JFrame {
 
         setupFactPanel();
 
-        // ✅ Always full screen fix
         addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
                 factPanel.setBounds(0,0,getWidth(),getHeight());
@@ -81,16 +80,33 @@ public class GameView extends JFrame {
         return panel;
     }
 
+    // ================= CENTER (🔥 PREMIUM IMAGE CARD) =================
     private JPanel createCenterPanel(){
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(new Color(30,30,30));
+
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(new Color(30,30,30));
+
+        JPanel card = new JPanel(new BorderLayout());
+        card.setPreferredSize(new Dimension(720,520));
+        card.setBackground(new Color(45,45,45));
+
+        // 🔥 Border + padding (premium look)
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(80,80,80),2),
+                BorderFactory.createEmptyBorder(20,20,20,20)
+        ));
 
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
-        panel.add(imageLabel, BorderLayout.CENTER);
+        imageLabel.setVerticalAlignment(JLabel.CENTER);
 
-        return panel;
+        card.add(imageLabel, BorderLayout.CENTER);
+
+        wrapper.add(card);
+
+        return wrapper;
     }
 
+    // ================= BOTTOM =================
     private JPanel createBottomPanel(){
 
         JPanel panel = new JPanel(new GridLayout(1,5,10,10));
@@ -129,7 +145,6 @@ public class GameView extends JFrame {
     }
 
     // ================= FACT PANEL =================
-
     private void setupFactPanel(){
 
         factPanel.setLayout(new BorderLayout());
@@ -162,7 +177,6 @@ public class GameView extends JFrame {
     }
 
     // ================= SOUND =================
-
     private void playSound(String fileName){
         try{
             File file = new File("src/sounds/" + fileName);
@@ -183,7 +197,6 @@ public class GameView extends JFrame {
     }
 
     // ================= LOGIC =================
-
     public void setTimer(int time){
 
         timerBar.setValue(time);
@@ -191,7 +204,7 @@ public class GameView extends JFrame {
 
         if(time <= 10){
             timerBar.setForeground(Color.RED);
-            playSound("tick.wav"); // 😈 panic
+            playSound("tick.wav");
         }else{
             timerBar.setForeground(new Color(0,200,0));
         }
@@ -217,7 +230,6 @@ public class GameView extends JFrame {
 
                     listener.accept(value);
 
-                    // 🔊 correct sound
                     playSound("correct.wav");
 
                     btn.setBackground(Color.GREEN);
@@ -237,8 +249,13 @@ public class GameView extends JFrame {
     public void displayQuestion(BananaQuestion q){
         try{
             ImageIcon icon = new ImageIcon(new URL(q.getImageUrl()));
-            Image img = icon.getImage().getScaledInstance(700,500, Image.SCALE_SMOOTH);
+
+            Image img = icon.getImage().getScaledInstance(
+                    650, 450, Image.SCALE_SMOOTH
+            );
+
             imageLabel.setIcon(new ImageIcon(img));
+
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -260,7 +277,6 @@ public class GameView extends JFrame {
         return logoutButton;
     }
 
-    // ✅ FIXED METHODS (for controller)
     public void hideAnswers(){
         for(JButton b : answerButtons){
             b.setVisible(false);
