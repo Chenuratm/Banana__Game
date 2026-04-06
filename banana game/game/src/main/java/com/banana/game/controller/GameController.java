@@ -30,7 +30,6 @@ public class GameController {
 
     private int time = 40;
     private Timer timer;
-
     private Timer shuffleTimer;
 
     private int[] currentAnswers;
@@ -77,15 +76,12 @@ public class GameController {
         }
 
         challenge++;
-
         view.setChallenge(challenge);
 
         currentQuestion = api.getQuestion(challenge);
-
         view.displayQuestion(currentQuestion);
 
         generateAnswers();
-
         applyDifficultyEffects();
 
         startTimer();
@@ -94,13 +90,11 @@ public class GameController {
     private void generateAnswers(){
 
         Random r = new Random();
-
         int correct = currentQuestion.getAnswer();
 
         int optionCount = (challenge == 1) ? 4 : 5;
 
         currentAnswers = new int[optionCount];
-
         Set<Integer> used = new HashSet<>();
 
         int correctIndex = r.nextInt(optionCount);
@@ -111,11 +105,9 @@ public class GameController {
                 currentAnswers[i] = correct;
                 used.add(correct);
             }else{
-
                 int wrong;
-
                 do{
-                    wrong = r.nextInt(10); // ONLY 0–9
+                    wrong = r.nextInt(10);
                 }while(used.contains(wrong));
 
                 currentAnswers[i] = wrong;
@@ -128,15 +120,9 @@ public class GameController {
 
     private void applyDifficultyEffects(){
 
-        if(challenge == 2){
-            hideTemporarily(3000);
-        }
-        else if(challenge == 3){
-            hideTemporarily(6000);
-        }
-        else if(challenge == 4){
-            hideTemporarily(9000);
-        }
+        if(challenge == 2) hideTemporarily(3000);
+        else if(challenge == 3) hideTemporarily(6000);
+        else if(challenge == 4) hideTemporarily(9000);
         else if(challenge == 5){
             hideTemporarily(9000);
             startShuffle();
@@ -158,17 +144,13 @@ public class GameController {
         if(shuffleTimer!=null) shuffleTimer.stop();
 
         shuffleTimer = new Timer(4000, e -> shuffleAnswers());
-
         shuffleTimer.start();
     }
 
     private void shuffleAnswers(){
 
         List<Integer> list = new ArrayList<>();
-
-        for(int a : currentAnswers){
-            list.add(a);
-        }
+        for(int a : currentAnswers) list.add(a);
 
         Collections.shuffle(list);
 
@@ -182,17 +164,14 @@ public class GameController {
     private void checkAnswer(int selected){
 
         timer.stop();
-
         if(shuffleTimer!=null) shuffleTimer.stop();
 
         if(selected == currentQuestion.getAnswer()){
-
             score += 10;
             view.setScore(score);
-
-            if(challenge == 6){
-                JOptionPane.showMessageDialog(view, "🎉 Congratulations! 🎉");
-            }
+            view.playCorrectSound(); // ✅ correct sound
+        }else{
+            view.playWrongSound(); // ✅ wrong sound
         }
 
         showFact();
@@ -201,15 +180,12 @@ public class GameController {
     private void showFact(){
 
         String fact = factService.getFact();
-
         view.showFact(fact);
 
         new Timer(5000,e->{
 
             ((Timer)e.getSource()).stop();
-
             view.showFact("");
-
             nextChallenge();
 
         }).start();
@@ -226,7 +202,6 @@ public class GameController {
                 "Game Over\nScore: "+score);
 
         SessionManager.logout();
-
         view.dispose();
 
         new LoginController();
@@ -238,7 +213,6 @@ public class GameController {
         if(shuffleTimer!=null) shuffleTimer.stop();
 
         SessionManager.logout();
-
         view.dispose();
 
         new LoginController();

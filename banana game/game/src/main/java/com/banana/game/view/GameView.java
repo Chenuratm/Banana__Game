@@ -8,7 +8,6 @@ import java.awt.event.*;
 import java.net.URL;
 import java.util.function.Consumer;
 import javax.sound.sampled.*;
-import java.io.File;
 
 public class GameView extends JFrame {
 
@@ -23,7 +22,6 @@ public class GameView extends JFrame {
     private JButton[] answerButtons = new JButton[5];
     private JButton logoutButton = new JButton("Logout");
 
-    // FULLSCREEN FACT PANEL
     private JPanel factPanel = new JPanel();
     private JLabel factLabel = new JLabel("", SwingConstants.CENTER);
 
@@ -52,7 +50,6 @@ public class GameView extends JFrame {
         setVisible(true);
     }
 
-    // ================= TOP =================
     private JPanel createTopPanel(){
 
         JPanel panel = new JPanel(new GridLayout(1,5,10,10));
@@ -80,7 +77,6 @@ public class GameView extends JFrame {
         return panel;
     }
 
-    // ================= CENTER (🔥 PREMIUM IMAGE CARD) =================
     private JPanel createCenterPanel(){
 
         JPanel wrapper = new JPanel(new GridBagLayout());
@@ -90,7 +86,6 @@ public class GameView extends JFrame {
         card.setPreferredSize(new Dimension(720,520));
         card.setBackground(new Color(45,45,45));
 
-        // 🔥 Border + padding (premium look)
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(80,80,80),2),
                 BorderFactory.createEmptyBorder(20,20,20,20)
@@ -106,7 +101,6 @@ public class GameView extends JFrame {
         return wrapper;
     }
 
-    // ================= BOTTOM =================
     private JPanel createBottomPanel(){
 
         JPanel panel = new JPanel(new GridLayout(1,5,10,10));
@@ -121,7 +115,6 @@ public class GameView extends JFrame {
             btn.setBackground(new Color(70,130,180));
             btn.setForeground(Color.WHITE);
 
-            // Hover effect
             btn.addMouseListener(new MouseAdapter() {
                 public void mouseEntered(MouseEvent e){
                     btn.setBackground(new Color(100,160,220));
@@ -144,7 +137,6 @@ public class GameView extends JFrame {
         label.setFont(new Font("Arial", Font.BOLD, 14));
     }
 
-    // ================= FACT PANEL =================
     private void setupFactPanel(){
 
         factPanel.setLayout(new BorderLayout());
@@ -176,17 +168,17 @@ public class GameView extends JFrame {
         factPanel.setVisible(true);
     }
 
-    // ================= SOUND =================
+    // ✅ FIXED SOUND SYSTEM (USING RESOURCES)
     private void playSound(String fileName){
         try{
-            File file = new File("src/sounds/" + fileName);
+            URL soundURL = getClass().getResource("/sounds/" + fileName);
 
-            if(!file.exists()){
-                System.out.println("Sound file not found: " + file.getAbsolutePath());
+            if(soundURL == null){
+                System.out.println("Sound not found: " + fileName);
                 return;
             }
 
-            AudioInputStream audio = AudioSystem.getAudioInputStream(file);
+            AudioInputStream audio = AudioSystem.getAudioInputStream(soundURL);
             Clip clip = AudioSystem.getClip();
             clip.open(audio);
             clip.start();
@@ -196,7 +188,19 @@ public class GameView extends JFrame {
         }
     }
 
-    // ================= LOGIC =================
+    // ✅ PUBLIC METHODS FOR CONTROLLER
+    public void playCorrectSound(){
+        playSound("correct.wav");
+    }
+
+    public void playWrongSound(){
+        playSound("wrong.wav");
+    }
+
+    public void playTickSound(){
+        playSound("tick.wav");
+    }
+
     public void setTimer(int time){
 
         timerBar.setValue(time);
@@ -204,7 +208,7 @@ public class GameView extends JFrame {
 
         if(time <= 10){
             timerBar.setForeground(Color.RED);
-            playSound("tick.wav");
+            playTickSound();
         }else{
             timerBar.setForeground(new Color(0,200,0));
         }
@@ -227,17 +231,7 @@ public class GameView extends JFrame {
                 }
 
                 btn.addActionListener(e -> {
-
                     listener.accept(value);
-
-                    playSound("correct.wav");
-
-                    btn.setBackground(Color.GREEN);
-
-                    new Timer(400, ev -> {
-                        btn.setBackground(new Color(70,130,180));
-                        ((Timer)ev.getSource()).stop();
-                    }).start();
                 });
 
             }else{
