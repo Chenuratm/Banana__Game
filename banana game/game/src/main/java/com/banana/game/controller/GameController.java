@@ -14,14 +14,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
-
 public class GameController {
 
     private GameView view;
 
-    private BananaApiService api = new BananaApiService();
-    private FactService factService = new FactService();
-    private UserService userService = new UserService();
+    private BananaApiService api = new BananaApiService(); // API
+    private FactService factService = new FactService();   // facts
+    private UserService userService = new UserService();   // user data
 
     private BananaQuestion currentQuestion;
 
@@ -34,18 +33,27 @@ public class GameController {
 
     private int[] currentAnswers;
 
+    /*
+     * Constructor
+     */
     public GameController(GameView view, String username){
 
         this.view = view;
 
+        // Create session (virtual identity)
         SessionManager.login(username);
+
         view.setUsername(username);
 
         nextChallenge();
 
+        // Logout button event
         view.getLogoutButton().addActionListener(e->logout());
     }
 
+    /*
+     * Start countdown timer
+     */
     private void startTimer(){
 
         time = 40;
@@ -68,6 +76,9 @@ public class GameController {
         timer.start();
     }
 
+    /*
+     * Load next question
+     */
     private void nextChallenge(){
 
         if(challenge >= 6){
@@ -87,6 +98,9 @@ public class GameController {
         startTimer();
     }
 
+    /*
+     * Generate answer options
+     */
     private void generateAnswers(){
 
         Random r = new Random();
@@ -118,6 +132,9 @@ public class GameController {
         view.setAnswers(currentAnswers, this::checkAnswer);
     }
 
+    /*
+     * Difficulty effects
+     */
     private void applyDifficultyEffects(){
 
         if(challenge == 2) hideTemporarily(3000);
@@ -129,6 +146,9 @@ public class GameController {
         }
     }
 
+    /*
+     * Hide answers temporarily
+     */
     private void hideTemporarily(int millis){
 
         view.hideAnswers();
@@ -139,6 +159,9 @@ public class GameController {
         }).start();
     }
 
+    /*
+     * Shuffle answers
+     */
     private void startShuffle(){
 
         if(shuffleTimer!=null) shuffleTimer.stop();
@@ -161,6 +184,9 @@ public class GameController {
         view.setAnswers(currentAnswers, this::checkAnswer);
     }
 
+    /*
+     * Check answer (EVENT HANDLER)
+     */
     private void checkAnswer(int selected){
 
         timer.stop();
@@ -169,14 +195,17 @@ public class GameController {
         if(selected == currentQuestion.getAnswer()){
             score += 10;
             view.setScore(score);
-            view.playCorrectSound(); // ✅ correct sound
+            view.playCorrectSound();
         }else{
-            view.playWrongSound(); // ✅ wrong sound
+            view.playWrongSound();
         }
 
         showFact();
     }
 
+    /*
+     * Show fact after answer
+     */
     private void showFact(){
 
         String fact = factService.getFact();
@@ -191,6 +220,9 @@ public class GameController {
         }).start();
     }
 
+    /*
+     * End game
+     */
     private void endGame(){
 
         if(timer!=null) timer.stop();
@@ -207,6 +239,9 @@ public class GameController {
         new LoginController();
     }
 
+    /*
+     * Logout
+     */
     private void logout(){
 
         if(timer!=null) timer.stop();
